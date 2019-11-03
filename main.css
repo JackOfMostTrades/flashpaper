@@ -1,0 +1,18 @@
+button.copy-to-clipboard {
+    position: relative;
+}
+button.copy-to-clipboard > .copy-tooltip {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: -100%;
+    margin-top: 0.7em;
+    padding: 4px;
+    border-radius: 4px;
+    background: #666666;
+    color: white;
+    font-size: 0.7em;
+}
+button.copy-to-clipboard:hover > .copy-tooltip.active {
+    display: block;
+}

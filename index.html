@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>FlashPaper</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+          rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+          crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"
+          rel="stylesheet" integrity="sha384-R1YHNrXeEniyCWFPaeU6FPn6fbr866YytGK2aZ3vVF3zQKIgUza8LYJ0HdOZ3FJI"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="/main.css">
+</head>
+
+<body>
+
+<!-- Handle github pages 404 redirect -->
+<script type="text/javascript">
+    if (window.location.search.startsWith("?p=")) {
+        var l = window.location;
+        var parts = l.search.substr(1).split("&");
+        var q = {};
+        for (var i = 0; i < parts.length; i++) {
+            var t = parts[i].split('=', 2);
+            q[t[0]] = decodeURIComponent(t[1]);
+        }
+        history.pushState(null, null, l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + q['p'] + (q['q'] ? ('?' + q['q']) : '') + l.hash);
+    }
+</script>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark static-top">
+    <div class="container">
+        <a class="navbar-brand" href="/"><img src="logo.png" style="height:2em"> FlashPaper</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div id="home" class="page container" style="display:none">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mt-5">Send a message</h1>
+            <div id="create-message">
+                <p>Generate a link for your message that can only be used once! Your message will be end-to-end
+                    encrypted so only you and the recipient can see the message.</p>
+                <textarea id="message" autocomplete="off" placeholder="The password is &quot;hunter2&quot;" style="width:100%" rows="5"
+                          class="form-control"></textarea>
+                <div class="text-right" style="margin-top:0.5em">
+                    <button id="create-message-button" class="btn btn-primary">Create Link</button>
+                </div>
+            </div>
+            <div id="create-message-result" style="display: none">
+                <p>Send this link to someone you trust. Don't go to it yourself or it won't work anymore!</p>
+                <div id="create-message-result-text" style="background: #eeeeee; padding: 1em"></div>
+                <div class="text-right" style="margin-top:0.5em">
+                    <button class="copy-to-clipboard btn btn-light" data-target="create-message-result-text">
+                        <i class="copy-tooltip"></i>
+                        <span><i class="fa fa-clipboard"></i> Copy to clipboard</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="about" class="page container" style="display:none">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mt-5">About</h1>
+            <p class="lead">FlashPaper is a tool for sending self-destructing messages with end-to-end encryption.</p>
+            <p>When you create a message with FlashPaper, you get a link that you can send to anyone else (by email,
+                slack, etc.). When the recipient clicks that link they see the message you sent them but that link can
+                then never be used again. If the sender, recipient, or anyone else tries to use that link they will only
+                see an error. Messages that have been left unviewed for 7 days will also be automatically deleted.</p>
+            <p>To further protect your messages, FlashPaper uses end-to-end encryption meaning that the FlashPaper
+                service never actually sees your message. When it is created it gets encrypted <span
+                        style="font-style: italic">in the browser</span> before it is sent to FlashPaper and stored. The
+                decryption key is part of the link sent to the recipient. When a message is viewed, the encrypted
+                version of it is fetched from the server (assuming it has not already been viewed) and then gets
+                decrypted <span style="font-style: italic">in the browser</span>. Thus, the server never sees the
+                plaintext message or the decryption key. Only the sender and receiver will ever have the ability to see
+                the message.</p>
+            <p>FlashPaper was written from scratch but is based on <a href="https://github.com/rawdigits/go-flashpaper">go-flashpaper</a>
+                and <a href="https://github.com/sebsauvage/ZeroBin">ZeroBin</a>. If you are interested in other similar
+                projects, also check out <a href="https://send.firefox.com/">Firefox Send</a>.</p>
+            <p>FlashPaper is open source software. Learn more about <a href="https://github.com/JackOfMostTrades/flashpaper">FlashPaper on GitHub</a>!</p>
+        </div>
+    </div>
+</div>
+<div id="view" class="page container" style="display:none">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mt-5">Your Message</h1>
+            <div id="view-message-loading">
+                <p><span style="font-style: italic">Loading...</span></p>
+            </div>
+            <div id="view-message-result" style="display:none">
+                <p>This message will become unavailable as soon as you close this tab.</p>
+                <div id="view-message-result-text" style="background: #eeeeee; padding: 1em"></div>
+                <div class="text-right" style="margin-top:0.5em">
+                    <button class="copy-to-clipboard btn btn-light" data-target="view-message-result-text">
+                        <i class="copy-tooltip"></i>
+                        <span><i class="fa fa-clipboard"></i> Copy to clipboard</span>
+                    </button>
+                </div>
+            </div>
+            <div id="view-message-error" style="display:none">
+                <p id="view-message-error-msg"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fork me on github ribbon -->
+<a class="github-fork-ribbon left-bottom fixed"
+   href="https://github.com/JackOfMostTrades/flashpaper"
+   data-ribbon="Fork me on GitHub"
+   title="Fork me on GitHub">Fork me on GitHub</a>
+
+<!-- Bootstrap core JavaScript -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script src="base64.js"></script>
+<script src="crypto.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var APPSCRIPT_PATH = 'https://young-forest-93546.herokuapp.com/REST/exec';
+
+        function navigate() {
+            var path = window.location.pathname;
+            $('body > .page').hide();
+            if (path === '/about') {
+                $('#about').show();
+            } else if (path === '/view') {
+                $('#view').show();
+                renderView();
+            } else {
+                $('#home').show();
+            }
+        }
+
+        function renderView() {
+            var hashParams = {};
+            var parts = window.location.hash.substring(1).split('&');
+            for (var i = 0; i < parts.length; i++) {
+                var p = parts[i].split('=', 2);
+                hashParams[p[0]] = p[1];
+            }
+
+            if (hashParams.key && hashParams.id) {
+                jQuery.ajax({
+                    url: APPSCRIPT_PATH + '?method=getMessage&id=' + encodeURIComponent(hashParams.id),
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: '{}'
+                }).done(function (resp) {
+                    if (resp.error) {
+                        $('#view-message-error-msg').empty().append(document.createTextNode("Failed to get this message: " + resp.error));
+                        $('#view-message-error').show();
+                        $('#view-message-loading').hide();
+                        return;
+                    }
+                    var ciphertext = base64DecToArr(resp.data);
+                    importKey(base64DecToArr(hashParams.key), function (key) {
+                        decrypt(key, ciphertext, function (plaintext) {
+                            $('#view-message-result-text').empty().append(document.createTextNode(encodeStr(plaintext)));
+                            $('#view-message-result').show();
+                            $('#view-message-loading').hide();
+                        });
+                    });
+                }).fail(function () {
+                    $('#view-message-error-msg').empty().append(document.createTextNode("Failed to get this message. Perhaps it has already been read?"));
+                    $('#view-message-error').show();
+                    $('#view-message-loading').hide();
+                })
+            }
+        }
+
+        $('nav a').click(function (e) {
+            if (e.target !== e.currentTarget) {
+                e.preventDefault();
+            }
+            e.stopPropagation();
+
+            history.pushState(null, null, e.target.href);
+            navigate();
+            return false;
+        });
+
+        window.addEventListener('popstate', function (e) {
+            navigate();
+        });
+
+        $('#create-message-button').click(function () {
+            // Disable the button and update the button label
+            $('#create-message-button').empty().append(document.createTextNode('Loading...')).prop('disabled', true);
+
+            // Convert the message into a Uint8Array
+            var data = decodeStr(document.getElementById('message').value);
+            generateKey(function (key) {
+                encrypt(key, data, function (encrypted) {
+                    //console.log(base64EncArr(encrypted));
+                    jQuery.ajax({
+                        url: APPSCRIPT_PATH + '?method=createMessage',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({data: base64EncArr(encrypted)})
+                    }).done(function (result) {
+                        if (result.error) {
+                            $('#create-message-result-text').empty().append(document.createTextNode(
+                                "Error: " + result.error
+                            ));
+                            $('#create-message').hide();
+                            $('#create-message-result').show();
+                        } else {
+                            exportKey(key, function (exportedKey) {
+                                $('#create-message-result-text').empty().append(document.createTextNode(
+                                    "https://" + window.location.host + "/view#id=" + result.id + "&key=" + base64EncArr(new Uint8Array(exportedKey))
+                                ));
+                                $('#create-message').hide();
+                                $('#create-message-result').show();
+                            });
+                        }
+                    });
+                });
+            });
+        });
+
+        $('button.copy-to-clipboard').click(function () {
+            var self = this;
+            var txt = document.getElementById(self.dataset['target']).childNodes[0].textContent;
+
+            var textarea = document.createElement("textarea");
+            textarea.textContent = txt;
+            textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");  // Security exception may be thrown by some browsers.
+            } catch (ex) {
+                console.warn("Copy to clipboard failed.", ex);
+                return false;
+            } finally {
+                document.body.removeChild(textarea);
+            }
+
+            $('.copy-tooltip', self).empty().append(document.createTextNode('Copied!')).addClass('active');
+            setTimeout(function () {
+                $('.copy-tooltip', self).empty().removeClass('active');
+            }, 3000);
+        });
+
+        navigate();
+    });
+</script>
+
+</body>
+
+</html>
