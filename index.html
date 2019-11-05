@@ -67,7 +67,9 @@
                 <textarea id="message" autocomplete="off" placeholder="The password is &quot;hunter2&quot;" style="width:100%" rows="5"
                           class="form-control"></textarea>
                 <div class="text-right" style="margin-top:0.5em">
-                    <button id="create-message-button" class="btn btn-primary">Create Link</button>
+                    <div class="g-recaptcha" style="display: inline-block" data-callback="captchaComplete" data-sitekey="6Lf9OcEUAAAAAKZFoeo6F9DK-p34EHoRjq1MhOTj"></div>
+                    <div></div>
+                    <button id="create-message-button" class="btn btn-primary" style="display:none">Create Link</button>
                 </div>
             </div>
             <div id="create-message-result" style="display: none">
@@ -147,10 +149,17 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <script src="base64.js"></script>
 <script src="crypto.js"></script>
 <script type="text/javascript">
+
+    function captchaComplete() {
+        $('.g-recaptcha').hide();
+        $('#create-message-button').show();
+    }
+
     $(document).ready(function () {
         var APPSCRIPT_PATH = 'https://young-forest-93546.herokuapp.com/REST/exec';
 
@@ -232,7 +241,10 @@
                         url: APPSCRIPT_PATH + '?method=createMessage',
                         type: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify({data: base64EncArr(encrypted)})
+                        data: JSON.stringify({
+                            captcha: grecaptcha.getResponse(),
+                            data: base64EncArr(encrypted)
+                        })
                     }).done(function (result) {
                         if (result.error) {
                             $('#create-message-result-text').empty().append(document.createTextNode(
@@ -249,6 +261,12 @@
                                 $('#create-message-result').show();
                             });
                         }
+                    }).fail(function (result) {
+                        $('#create-message-result-text').empty().append(document.createTextNode(
+                            "Error: " + result.responseText
+                        ));
+                        $('#create-message').hide();
+                        $('#create-message-result').show();
                     });
                 });
             });

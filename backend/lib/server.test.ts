@@ -3,7 +3,7 @@ import rp from 'request-promise-native';
 import http from 'http';
 import assert from 'assert';
 import {Clock, FlashPaperService, StorageService, MAX_MESSAGE_AGE} from "./service";
-import {FlashPaperServer} from "./server";
+import {CaptchaProvider, FlashPaperServer} from "./server";
 import uuid from 'uuid-random';
 
 class MockClock implements Clock {
@@ -47,12 +47,19 @@ class MemoryStorageService implements StorageService {
     }
 }
 
+const VALID_CAPTCHA = "VALID_CAPTCHA";
+class MockCaptchaProvider implements CaptchaProvider {
+    public isValidCaptcha(captcha: string): Promise<boolean> {
+        return Promise.resolve(captcha == VALID_CAPTCHA);
+    }
+}
+
 let clock = new MockClock();
 let service = new FlashPaperService(new MemoryStorageService(clock));
 
 describe('FlashPaperServer', () => {
     it('Create and Get Message', async () => {
-        let server = new FlashPaperServer(service);
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
             let id = await rp({
@@ -60,6 +67,7 @@ describe('FlashPaperServer', () => {
                 uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
                 json: true,
                 body: {
+                    captcha: VALID_CAPTCHA,
                     data: 'AAAA'
                 },
             }).then(function (parsedBody) {
@@ -91,7 +99,7 @@ describe('FlashPaperServer', () => {
     });
 
     it('Expired Message', async () => {
-        let server = new FlashPaperServer(service);
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
             let id = await rp({
@@ -99,6 +107,7 @@ describe('FlashPaperServer', () => {
                 uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
                 json: true,
                 body: {
+                    captcha: VALID_CAPTCHA,
                     data: 'AAAA'
                 },
             }).then(function (parsedBody) {
@@ -121,8 +130,53 @@ describe('FlashPaperServer', () => {
         }
     });
 
+    it('Missing Captcha', async () => {
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
+        await server.start();
+        try {
+            assert.rejects(rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
+                json: true,
+                body: {
+                    data: 'AAAA'
+                },
+            }));
+        } finally {
+            server.stop();
+        }
+    });
+
+    it('Bad Captcha', async () => {
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
+        await server.start();
+        try {
+            assert.rejects(rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
+                json: true,
+                body: {
+                    captcha: 'foo',
+                    data: 'AAAA'
+                },
+            }));
+
+            assert.rejects(rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
+                json: true,
+                body: {
+                    captcha: 'foo',
+                    data: 'AAAA'
+                },
+            }));
+        } finally {
+            server.stop();
+        }
+    });
+
     it('CORS Origin', async () => {
-        let server = new FlashPaperServer(service);
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
             let responseHeaders = await new Promise<http.IncomingHttpHeaders>((resolve, reject) => {

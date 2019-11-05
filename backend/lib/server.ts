@@ -1,17 +1,50 @@
 import express, {Application} from 'express';
+import rp from 'request-promise-native';
 import * as http from "http";
 import {AddressInfo} from "net";
 import cors from 'cors';
 import {FlashPaperService} from './service';
 
+export interface CaptchaProvider {
+    isValidCaptcha(captcha: string): Promise<boolean>;
+}
+
+export class RecaptchaProvider implements CaptchaProvider {
+    private secretKey: string;
+
+    constructor(secretKey?: string) {
+        if (!secretKey) {
+            throw new Error("Invalid Recaptcha secret key");
+        }
+        this.secretKey = secretKey;
+    }
+
+    public async isValidCaptcha(captcha: string): Promise<boolean> {
+        if (!captcha) {
+            return false;
+        }
+
+        let resp = await rp.post('https://www.google.com/recaptcha/api/siteverify', {
+            form: {
+                secret: this.secretKey,
+                response: captcha
+            }
+        });
+        let respBody = JSON.parse(resp);
+        return respBody.success;
+    }
+}
+
 export class FlashPaperServer {
     private service: FlashPaperService;
+    private captchaProvider: CaptchaProvider;
     private port: number|undefined;
     private app: Application;
     private server: http.Server|undefined;
 
-    constructor(service: FlashPaperService, port?: number) {
+    constructor(service: FlashPaperService, captchaProvider: CaptchaProvider, port?: number) {
         this.service = service;
+        this.captchaProvider = captchaProvider;
         this.port = port;
 
         this.app = express()
@@ -19,12 +52,9 @@ export class FlashPaperServer {
             .use(express.json())
             .post('/REST/exec', async (req, res) => {
                 if (req.query.method === 'createMessage') {
-                    if (!req.body.data) {
-                        return res.status(400).json({error: "Missing message data"});
-                    }
-                    return res.json(await this.service.createMessage(req.body.data));
+                    return await this.createMessage(req, res);
                 } else if (req.query.method === 'getMessage') {
-                    return res.json(await this.service.getMessage(req.query.id));
+                    return await this.getMessage(req, res);
                 }
                 return res.json({"error": "Invalid method: " + req.query.method});
             });
@@ -58,5 +88,20 @@ export class FlashPaperServer {
                 resolve();
             });
         });
+    }
+
+    private async createMessage(req: express.Request, res: express.Response): Promise<express.Response> {
+        if (!req.body.data) {
+            return res.status(400).json({error: "Missing message data"});
+        }
+        if (! await this.captchaProvider.isValidCaptcha(req.body.captcha)) {
+            return res.status(400).json({error: "Invalid captcha response"});
+        }
+
+        return res.json(await this.service.createMessage(req.body.data));
+    }
+
+    private async getMessage(req: express.Request, res: express.Response): Promise<express.Response> {
+        return res.json(await this.service.getMessage(req.query.id));
     }
 }
