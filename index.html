@@ -66,6 +66,9 @@
                     encrypted so only you and the recipient can see the message.</p>
                 <textarea id="message" autocomplete="off" placeholder="The password is &quot;hunter2&quot;" style="width:100%" rows="5"
                           class="form-control"></textarea>
+                <div id="message-too-long" style="display: none;font-style:italic;color:red">
+                    Your message is too long! FlashPaper only supports sending short messages.
+                </div>
                 <div class="text-right" style="margin-top:0.5em">
                     <div class="g-recaptcha" style="display: inline-block" data-callback="captchaComplete" data-sitekey="6Lf9OcEUAAAAAKZFoeo6F9DK-p34EHoRjq1MhOTj"></div>
                     <div></div>
@@ -228,9 +231,22 @@
             navigate();
         });
 
+        $('#message').on('input', function() {
+            var data = document.getElementById('message').value;
+            if (data.length > 700) {
+                $('#create-message-button').prop('disabled', true);
+                $('#message-too-long').show();
+            } else {
+                $('#create-message-button').prop('disabled', false);
+                $('#message-too-long').hide();
+            }
+        });
+
         $('#create-message-button').click(function () {
             // Disable the button and update the button label
             $('#create-message-button').empty().append(document.createTextNode('Loading...')).prop('disabled', true);
+            // Disable text entry
+            $('#message').prop('disabled', true);
 
             // Convert the message into a Uint8Array
             var data = decodeStr(document.getElementById('message').value);
