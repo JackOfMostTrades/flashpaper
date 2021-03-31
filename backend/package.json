@@ -23,7 +23,7 @@
     "@types/ioredis": "^4.0.18",
     "@types/mocha": "^8.2.2",
     "@types/node": "^12.12.5",
-    "@types/request": "^2.48.3",
+    "@types/request": "^2.48.5",
     "@types/request-promise-native": "^1.0.17",
     "mocha": "^8.3.2",
     "ts-node": "^9.1.1",
