@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
-    "@types/express": "^4.17.2",
+    "@types/express": "^4.17.11",
     "@types/ioredis": "^4.0.18",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.5",
