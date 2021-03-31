@@ -102,6 +102,10 @@ export class FlashPaperServer {
     }
 
     private async getMessage(req: express.Request, res: express.Response): Promise<express.Response> {
-        return res.json(await this.service.getMessage(req.query.id));
+        let messageId = req.query.id;
+        if (typeof messageId !== 'string') {
+            return res.status(400).json({error: "Invalid id query parameter"});
+        }
+        return res.json(await this.service.getMessage(messageId));
     }
 }

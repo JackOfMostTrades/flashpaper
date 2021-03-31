@@ -98,6 +98,40 @@ describe('FlashPaperServer', () => {
         }
     });
 
+    it('Invalid id query param', async () => {
+        let server = new FlashPaperServer(service, new MockCaptchaProvider());
+        await server.start();
+        try {
+            let id = await rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
+                json: true,
+                body: {
+                    captcha: VALID_CAPTCHA,
+                    data: 'AAAA'
+                },
+            }).then(function (parsedBody) {
+                return parsedBody.id;
+            });
+
+            // Repeated parameter
+            assert.rejects(rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id + '&id=' + id,
+                json: true,
+            }));
+
+            // Missing parameter
+            assert.rejects(rp({
+                method: 'POST',
+                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage',
+                json: true,
+            }));
+        } finally {
+            server.stop();
+        }
+    });
+
     it('Expired Message', async () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
