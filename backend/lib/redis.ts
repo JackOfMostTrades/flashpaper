@@ -15,7 +15,7 @@ export class RedisStorageService implements StorageService {
         let redis_uri = url.parse(u);
         let options: RedisOptions = {
             port: Number(redis_uri.port),
-            host: redis_uri.hostname,
+            host: redis_uri.hostname || undefined,
             password: (redis_uri.auth ? redis_uri.auth.split(':')[1] : undefined),
             db: 0,
         };
