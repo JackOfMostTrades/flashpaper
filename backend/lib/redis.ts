@@ -8,18 +8,11 @@ export class RedisStorageService implements StorageService {
     private client: Redis;
 
     constructor() {
-        let u = process.env.REDIS_URL;
+        let u = process.env.REDIS_TLS_URL;
         if (!u) {
             throw new Error("Redis URL environment variable not set");
         }
-        let redis_uri = url.parse(u);
-        let options: RedisOptions = {
-            port: Number(redis_uri.port),
-            host: redis_uri.hostname || undefined,
-            password: (redis_uri.auth ? redis_uri.auth.split(':')[1] : undefined),
-            db: 0,
-        };
-        this.client = new IORedis(options);
+        this.client = new Redis(u);
     }
 
     generateUuid(): string {
