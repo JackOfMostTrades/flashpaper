@@ -7,7 +7,7 @@ export class RedisStorageService implements StorageService {
     private client: Redis;
 
     constructor() {
-        let u = process.env.REDIS_TLS_URL;
+        let u = process.env.REDIS_URL;
         if (!u) {
             throw new Error("Redis URL environment variable not set");
         }
