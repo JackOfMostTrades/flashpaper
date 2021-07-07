@@ -21,7 +21,7 @@
     "@types/cors": "^2.8.11",
     "@types/express": "^4.17.12",
     "@types/ioredis": "^4.26.4",
-    "@types/mocha": "^8.2.2",
+    "@types/mocha": "^8.2.3",
     "@types/node": "^15.14.0",
     "@types/request": "^2.48.5",
     "@types/request-promise-native": "^1.0.17",
