@@ -44,8 +44,8 @@ export class FlashPaperService {
             let id = this.storageService.generateUuid();
             await this.storageService.storeMessage(id, message, MAX_MESSAGE_AGE);
             return {id: id};
-        } catch (e) {
-            return {error: e.message};
+        } catch (e: any) {
+            return {error: e.toString()};
         }
     }
 
@@ -56,8 +56,8 @@ export class FlashPaperService {
                 return {data: message};
             }
             return {error: "Unable to find message. Already read?"};
-        } catch (e) {
-            return {error: e.message};
+        } catch (e: any) {
+            return {error: e.toString()};
         }
     }
 }
