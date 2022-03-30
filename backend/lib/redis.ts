@@ -1,4 +1,4 @@
-import IORedis, {Redis} from "ioredis";
+import Redis from "ioredis";
 import uuid from 'uuid-random';
 import {StorageService} from "./service";
 
@@ -11,7 +11,7 @@ export class RedisStorageService implements StorageService {
         if (!u) {
             throw new Error("Redis URL environment variable not set");
         }
-        this.client = new IORedis(u);
+        this.client = new Redis(u);
     }
 
     generateUuid(): string {
