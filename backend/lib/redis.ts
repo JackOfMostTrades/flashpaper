@@ -7,11 +7,17 @@ export class RedisStorageService implements StorageService {
     private client: Redis;
 
     constructor() {
-        let u = process.env.REDIS_URL;
-        if (!u) {
-            throw new Error("Redis URL environment variable not set");
+        let pw = process.env.REDIS_PASSWORD;
+        if (!pw) {
+            throw new Error("REDIS_PASSWORD environment variable not set");
         }
-        this.client = new Redis(u);
+        this.client = new Redis({
+            host: 'fly-flashpaper-redis.upstash.io',
+            port: 6379,
+            username: 'default',
+            password: pw,
+            family: 6
+        });
     }
 
     generateUuid(): string {
