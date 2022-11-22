@@ -30,7 +30,7 @@ This Repository
 ---------------
 
 The frontend of this application is static HTML/JavaScript and is hosted on [Github Pages](https://pages.github.com/).
-The backend of this application is run on [Heroku](https://www.heroku.com/).
+The backend of this application is run on [Fly.io](https://fly.io/).
 
 This application is designed so that anyone can fork the repository and run it themselves. You will just need to update
 the deployed app script url [here](index.html#L144).
