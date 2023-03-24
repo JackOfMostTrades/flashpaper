@@ -24,11 +24,14 @@ export class RecaptchaProvider implements CaptchaProvider {
             return false;
         }
 
-        let form = new FormData();
-        form.set('secret', this.secretKey);
-        form.set('response', captcha);
+        let form = new URLSearchParams();
+        form.append('secret', this.secretKey);
+        form.append('response', captcha);
         let resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
             method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: form.toString(),
         });
         if (!resp.ok) {
