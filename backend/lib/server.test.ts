@@ -1,10 +1,17 @@
 import {describe, it} from 'mocha'
-import rp from 'request-promise-native';
-import http from 'http';
 import assert from 'assert';
-import {Clock, FlashPaperService, StorageService, MAX_MESSAGE_AGE} from "./service";
+import {
+    Clock,
+    CreateMessageResponse,
+    ErrorResponse,
+    FlashPaperService,
+    GetMessageResponse,
+    MAX_MESSAGE_AGE,
+    StorageService
+} from "./service";
 import {CaptchaProvider, FlashPaperServer} from "./server";
 import uuid from 'uuid-random';
+import fetch from 'node-fetch';
 
 class MockClock implements Clock {
     public current: Date = new Date();
@@ -62,34 +69,35 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            let id = await rp({
+            let id = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     captcha: VALID_CAPTCHA,
                     data: 'AAAA'
-                },
-            }).then(function (parsedBody) {
-                return parsedBody.id;
+                })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as CreateMessageResponse).id;
             });
 
-            let message = await rp({
+            let message = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id, {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id,
-                json: true,
-            }).then(function (parsedBody) {
-                return parsedBody.data;
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as GetMessageResponse).data;
             });
 
             assert.strictEqual(message, 'AAAA');
 
-            let err = await rp({
+            let err = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id, {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id,
-                json: true,
-            }).then(function (parsedBody) {
-                return parsedBody.error;
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as ErrorResponse).error;
             });
 
             assert.strictEqual(err, 'Unable to find message. Already read?');
@@ -102,31 +110,30 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            let id = await rp({
+            let id = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     captcha: VALID_CAPTCHA,
                     data: 'AAAA'
-                },
-            }).then(function (parsedBody) {
-                return parsedBody.id;
+                }),
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as CreateMessageResponse).id;
             });
 
             // Repeated parameter
-            assert.rejects(rp({
+            let resp = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id + '&id=' + id,{
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id + '&id=' + id,
-                json: true,
-            }));
+            });
+            assert.strictEqual(resp.ok, false);
 
             // Missing parameter
-            assert.rejects(rp({
+            resp = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=getMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage',
-                json: true,
-            }));
+            });
+            assert.strictEqual(resp.ok, false);
         } finally {
             server.stop();
         }
@@ -136,26 +143,27 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            let id = await rp({
+            let id = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     captcha: VALID_CAPTCHA,
                     data: 'AAAA'
-                },
-            }).then(function (parsedBody) {
-                return parsedBody.id;
+                }),
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as CreateMessageResponse).id;
             });
 
             clock.current = new Date(clock.current.getTime() + MAX_MESSAGE_AGE + 1);
 
-            let err = await rp({
+            let err = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id, {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=getMessage&id=' + id,
-                json: true,
-            }).then(function (parsedBody) {
-                return parsedBody.error;
+            }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                return (response as ErrorResponse).error;
             });
 
             assert.strictEqual(err, 'Unable to find message. Already read?');
@@ -168,14 +176,14 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            assert.rejects(rp({
+            let resp = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     data: 'AAAA'
-                },
-            }));
+                }),
+            });
+            assert.strictEqual(resp.ok, false);
         } finally {
             server.stop();
         }
@@ -185,25 +193,25 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            assert.rejects(rp({
+            let resp = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     captcha: 'foo',
                     data: 'AAAA'
-                },
-            }));
+                }),
+            });
+            assert.strictEqual(resp.ok, false);
 
-            assert.rejects(rp({
+            resp = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
                 method: 'POST',
-                uri: 'http://localhost:' + server.getPort() + '/REST/exec?method=createMessage',
-                json: true,
-                body: {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     captcha: 'foo',
                     data: 'AAAA'
-                },
-            }));
+                }),
+            });
+            assert.strictEqual(resp.ok, false);
         } finally {
             server.stop();
         }
@@ -213,22 +221,17 @@ describe('FlashPaperServer', () => {
         let server = new FlashPaperServer(service, new MockCaptchaProvider());
         await server.start();
         try {
-            let responseHeaders = await new Promise<http.IncomingHttpHeaders>((resolve, reject) => {
-                let req = http.request({
-                    method: 'POST',
-                    port: server.getPort(),
-                    path: '/REST/exec?method=createMessage',
-                    headers: {
-                        'Origin': 'https://foo.example.com',
-                    }
-                }, (resp: http.IncomingMessage) => {
-                    resolve(resp.headers);
-                });
-                req.on('error', (e: Error) => reject(e));
-                req.write(JSON.stringify({data: 'AAAA'}));
-                req.end();
+            let response = await fetch('http://localhost:' + server.getPort() + '/REST/exec?method=createMessage', {
+                method: 'POST',
+                headers: {
+                    'Origin': 'https://foo.example.com',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: 'AAAA'
+                }),
             });
-            assert.strictEqual(responseHeaders['access-control-allow-origin'], '*');
+            assert.strictEqual(response.headers.get('access-control-allow-origin'), '*');
         } finally {
             server.stop();
         }

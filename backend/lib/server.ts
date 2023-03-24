@@ -1,9 +1,9 @@
 import express, {Application} from 'express';
-import rp from 'request-promise-native';
 import * as http from "http";
 import {AddressInfo} from "net";
 import cors from 'cors';
 import {FlashPaperService} from './service';
+import fetch from "node-fetch";
 
 export interface CaptchaProvider {
     isValidCaptcha(captcha: string): Promise<boolean>;
@@ -24,14 +24,18 @@ export class RecaptchaProvider implements CaptchaProvider {
             return false;
         }
 
-        let resp = await rp.post('https://www.google.com/recaptcha/api/siteverify', {
-            form: {
-                secret: this.secretKey,
-                response: captcha
-            }
+        let form = new FormData();
+        form.set('secret', this.secretKey);
+        form.set('response', captcha);
+        let resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            body: form.toString(),
         });
-        let respBody = JSON.parse(resp);
-        return respBody.success;
+        if (!resp.ok) {
+            throw new Error("Non-200 response for captcha verification.");
+        }
+        let respBody = await resp.json();
+        return (respBody as any).success;
     }
 }
 
