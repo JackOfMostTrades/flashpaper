@@ -1,6 +1,6 @@
-import Redis from "ioredis";
 import uuid from 'uuid-random';
-import {StorageService} from "./service";
+import {StorageService} from "./service.js";
+import {Redis} from "ioredis";
 
 export class RedisStorageService implements StorageService {
 

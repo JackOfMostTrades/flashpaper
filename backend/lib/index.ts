@@ -1,6 +1,6 @@
-import {FlashPaperService} from './service';
-import {FlashPaperServer, RecaptchaProvider} from "./server";
-import {RedisStorageService} from "./redis";
+import {FlashPaperService} from './service.js';
+import {FlashPaperServer, RecaptchaProvider} from "./server.js";
+import {RedisStorageService} from "./redis.js";
 import dotenv from 'dotenv';
 
 dotenv.config();

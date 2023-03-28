@@ -8,8 +8,8 @@ import {
     GetMessageResponse,
     MAX_MESSAGE_AGE,
     StorageService
-} from "./service";
-import {CaptchaProvider, FlashPaperServer} from "./server";
+} from "./service.js";
+import {CaptchaProvider, FlashPaperServer} from "./server.js";
 import uuid from 'uuid-random';
 import fetch from 'node-fetch';
 

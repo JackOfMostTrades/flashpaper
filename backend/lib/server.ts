@@ -2,7 +2,7 @@ import express, {Application} from 'express';
 import * as http from "http";
 import {AddressInfo} from "net";
 import cors from 'cors';
-import {FlashPaperService} from './service';
+import {FlashPaperService} from './service.js';
 import fetch from "node-fetch";
 
 export interface CaptchaProvider {

@@ -2,13 +2,13 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"target": "es6",
-		"moduleResolution": "node",
+		"moduleResolution": "nodenext",
 		"outDir": "./dist",
 		"lib": [
 			"es6",
 			"dom"
 		],
-		"module": "commonjs",
+		"module": "nodenext",
         "declaration": true,
         "strict": true,
 		"esModuleInterop": true,
