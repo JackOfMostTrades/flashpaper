@@ -9,7 +9,3 @@ dist/
 .DS_Store
 .idea/
 *.iml
-
-# Docker
-Dockerfile
-docker-compose.yml

@@ -1,9 +1,15 @@
-# fly.toml file generated for flashpaper on 2022-11-22T14:28:17-08:00
+# fly.toml app configuration file generated for flashpaper on 2023-05-09T08:25:33-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "flashpaper"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "sjc"
 processes = []
+
+[build]
 
 [env]
   PORT = "8080"
