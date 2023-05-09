@@ -28,6 +28,7 @@ RUN npm install --production=false
 COPY --link . .
 
 # Remove development dependencies
+RUN npm run build
 RUN npm prune --production
 
 
