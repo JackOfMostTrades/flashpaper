@@ -59,9 +59,9 @@ export class FlashPaperServer {
             .use(express.json())
             .post('/REST/exec', async (req, res) => {
                 if (req.query.method === 'createMessage') {
-                    return await this.createMessage(req, res);
+                    return this.createMessage(req, res);
                 } else if (req.query.method === 'getMessage') {
-                    return await this.getMessage(req, res);
+                    return this.getMessage(req, res);
                 }
                 return res.json({"error": "Invalid method: " + req.query.method});
             });
