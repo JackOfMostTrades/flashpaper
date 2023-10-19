@@ -22,7 +22,7 @@
     "@types/express": "^4.17.20",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.6",
-    "@types/request": "^2.48.10",
+    "@types/request": "^2.48.11",
     "@types/request-promise-native": "^1.0.18",
     "mocha": "^10.2.0",
     "ts-node": "^10.9.1",
