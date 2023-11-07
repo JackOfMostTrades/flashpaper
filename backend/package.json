@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.16",
     "@types/express": "^4.17.20",
-    "@types/mocha": "^10.0.2",
+    "@types/mocha": "^10.0.3",
     "@types/node": "^20.8.10",
     "@types/request": "^2.48.11",
     "@types/request-promise-native": "^1.0.20",
