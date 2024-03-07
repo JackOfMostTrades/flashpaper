@@ -26,6 +26,6 @@
     "@types/request-promise-native": "^1.0.21",
     "mocha": "^10.3.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   }
 }
